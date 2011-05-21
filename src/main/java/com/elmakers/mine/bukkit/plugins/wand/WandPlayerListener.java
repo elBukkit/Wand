@@ -287,10 +287,12 @@ class WandPlayerListener extends PlayerListener
 					cycleSpells(event.getPlayer());
 				}
 			}
+			/*
 			else
 			{
 				spellHelp(event.getPlayer());
 			}
+			*/
     	}
     }
 
