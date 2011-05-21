@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 1.0
+
+ - Try to get this updated to work with latest CB and Persistence
+
 # 0.65
 
  - Bring material cycling back! Requires CB#478

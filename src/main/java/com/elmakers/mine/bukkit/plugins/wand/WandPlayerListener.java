@@ -3,11 +3,11 @@ package com.elmakers.mine.bukkit.plugins.wand;
 import java.util.List;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
-import org.bukkit.event.player.PlayerItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -81,7 +81,7 @@ class WandPlayerListener extends PlayerListener
 		
 		for (int i = 8; i >= 0; i--)
 		{
-			Material mat = contents[i].getType();
+			Material mat = contents[i] == null ? Material.AIR : contents[i].getType();
 			if (mat == Material.AIR)
 			{
 				if (foundAir)
@@ -119,8 +119,7 @@ class WandPlayerListener extends PlayerListener
 		contents[firstMaterialSlot] = lastSlot;
 
 		inventory.setContents(contents);
-		CraftPlayer cPlayer = ((CraftPlayer)player);
-		cPlayer.getHandle().l();
+		player.updateInventory();
 		
 		return true;
 	}
@@ -138,11 +137,13 @@ class WandPlayerListener extends PlayerListener
 		int firstSpellSlot = -1;
 		for (int i = 0; i < 9; i++)
 		{
-			boolean isWand = active[i].getTypeId() == wands.getWandTypeId();
+			boolean isEmpty = active[i] == null;
+			Material activeType = isEmpty ? Material.AIR : active[i].getType();
+			boolean isWand = activeType.getId() == wands.getWandTypeId();
 			boolean isSpell = false;
-			if (active[i].getType() != Material.AIR)
+			if (activeType != Material.AIR)
 			{
-				SpellVariant spell = spells.getSpell(active[i].getType(), player);
+				SpellVariant spell = spells.getSpell(activeType, player);
 				isSpell = spell != null;
 			}
 			
@@ -171,13 +172,15 @@ class WandPlayerListener extends PlayerListener
 		for (int ddi = 0; ddi < numSpellSlots; ddi++)
 		{
 			int i = ddi + firstSpellSlot;
-			if (contents[i].getTypeId() != wands.getWandTypeId())
+			Material contentsType = contents[i] == null ? Material.AIR : active[i].getType();
+			if (contentsType.getId() != wands.getWandTypeId())
 			{
 				for (int di = 1; di < numSpellSlots; di++)
 				{
 					int dni = (ddi + di) % numSpellSlots;
 					int ni = dni + firstSpellSlot;
-					if (active[ni].getTypeId() != wands.getWandTypeId())
+					Material activeType = active[ni]== null ? Material.AIR : active[ni].getType();
+					if (activeType.getId() != wands.getWandTypeId())
 					{
 						contents[i] = active[ni];
 						break;
@@ -187,8 +190,7 @@ class WandPlayerListener extends PlayerListener
 		}
 		
 		inventory.setContents(contents);
-		CraftPlayer cPlayer = ((CraftPlayer)player);
-		cPlayer.getHandle().l();
+		player.updateInventory();
 	}
 	
 	public void spellHelp(Player player)
@@ -255,38 +257,41 @@ class WandPlayerListener extends PlayerListener
      * @param event Relevant event details
      */
 	@Override
-    public void onPlayerItem(PlayerItemEvent event) 
+    public void onPlayerInteract(PlayerInteractEvent event) 
 	{
-		int materialId = event.getPlayer().getInventory().getItemInHand().getTypeId();
-		Player player = event.getPlayer();
-		WandPermissions permissions = wands.getPermissions(player.getName());
-
-		if (!permissions.canUse())
-		{
-			return;
-		}
-		
-		boolean cycleSpells = false;
-
-		cycleSpells = player.isSneaking();
-		if (materialId == wands.getWandTypeId())
-		{	
-			if (cycleSpells)
+		if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
+    	{
+			int materialId = event.getPlayer().getInventory().getItemInHand().getTypeId();
+			Player player = event.getPlayer();
+			WandPermissions permissions = wands.getPermissions(player.getName());
+	
+			if (!permissions.canUse())
 			{
-				if (!cycleMaterials(event.getPlayer()))
+				return;
+			}
+			
+			boolean cycleSpells = false;
+	
+			cycleSpells = player.isSneaking();
+			if (materialId == wands.getWandTypeId())
+			{	
+				if (cycleSpells)
+				{
+					if (!cycleMaterials(event.getPlayer()))
+					{
+						cycleSpells(event.getPlayer());
+					}
+				}
+				else
 				{
 					cycleSpells(event.getPlayer());
 				}
 			}
 			else
 			{
-				cycleSpells(event.getPlayer());
+				spellHelp(event.getPlayer());
 			}
-		}
-		else
-		{
-			spellHelp(event.getPlayer());
-		}
+    	}
     }
 
 }

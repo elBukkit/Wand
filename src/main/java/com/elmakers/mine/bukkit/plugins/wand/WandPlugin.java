@@ -36,7 +36,7 @@ public class WandPlugin extends JavaPlugin
         PluginManager pm = getServer().getPluginManager();
 		
         pm.registerEvent(Type.PLAYER_ANIMATION, playerListener, Priority.Normal, this);
-        pm.registerEvent(Type.PLAYER_ITEM, playerListener, Priority.Normal, this);
+        pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
         
         PluginDescriptionFile pdfFile = this.getDescription();
         log.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled");
