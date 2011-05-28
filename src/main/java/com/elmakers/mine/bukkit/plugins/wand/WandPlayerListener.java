@@ -1,5 +1,6 @@
 package com.elmakers.mine.bukkit.plugins.wand;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -12,6 +13,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import com.elmakers.mine.bukkit.plugins.spells.SpellVariant;
 import com.elmakers.mine.bukkit.plugins.spells.Spells;
@@ -64,8 +66,7 @@ class WandPlayerListener extends PlayerListener
 				if (spell != null)
 				{
 					wands.getSpells().castSpell(spell, player);
-				}
-				
+				}			
 			}
 		}
     }
@@ -119,7 +120,11 @@ class WandPlayerListener extends PlayerListener
 		contents[firstMaterialSlot] = lastSlot;
 
 		inventory.setContents(contents);
-		player.updateInventory();
+		
+		ItemStack itemStack = new ItemStack(Material.getMaterial(wands.getWandTypeId()), 1);
+		player.getInventory().addItem(itemStack);
+		player.getInventory().removeItem(itemStack);
+		//player.updateInventory();
 		
 		return true;
 	}
@@ -131,9 +136,10 @@ class WandPlayerListener extends PlayerListener
 		ItemStack[] contents = inventory.getContents();
 		ItemStack[] active = new ItemStack[9];
 		
+		List<Material> newSpellOrder = new ArrayList<Material>();
+		
 		for (int i = 0; i < 9; i++) { active[i] = contents[i]; }
 		
-		int maxSpellSlot = 0;
 		int firstSpellSlot = -1;
 		for (int i = 0; i < 9; i++)
 		{
@@ -150,7 +156,8 @@ class WandPlayerListener extends PlayerListener
 			if (isSpell)
 			{
 				if (firstSpellSlot < 0) firstSpellSlot = i;
-				maxSpellSlot = i;
+				newSpellOrder.add(activeType);
+				inventory.remove(active[i]);
 			}
 			else
 			{
@@ -162,35 +169,19 @@ class WandPlayerListener extends PlayerListener
 			
 		}
 		
-		int numSpellSlots = firstSpellSlot < 0 ? 0 : maxSpellSlot - firstSpellSlot + 1;
-		
-		if (numSpellSlots < 2)
+		if (newSpellOrder.size() > 0)
 		{
-			return;
+		    newSpellOrder.add(newSpellOrder.remove(0));
+		    List<ItemStack> items = new ArrayList<ItemStack>();
+		    for (Material spellMat : newSpellOrder)
+		    {
+		        ItemStack itemStack = new ItemStack(spellMat, 1);
+		        items.add(itemStack);	        
+		    }
+		    
+		    BukkitScheduler bs = wands.getServer().getScheduler();
+		    bs.scheduleSyncDelayedTask(wands.getPlugin(), new AddToInventoryTask(player, items), 1);
 		}
-		
-		for (int ddi = 0; ddi < numSpellSlots; ddi++)
-		{
-			int i = ddi + firstSpellSlot;
-			Material contentsType = contents[i] == null ? Material.AIR : active[i].getType();
-			if (contentsType.getId() != wands.getWandTypeId())
-			{
-				for (int di = 1; di < numSpellSlots; di++)
-				{
-					int dni = (ddi + di) % numSpellSlots;
-					int ni = dni + firstSpellSlot;
-					Material activeType = active[ni]== null ? Material.AIR : active[ni].getType();
-					if (activeType.getId() != wands.getWandTypeId())
-					{
-						contents[i] = active[ni];
-						break;
-					}
-				}
-			}
-		}
-		
-		inventory.setContents(contents);
-		player.updateInventory();
 	}
 	
 	public void spellHelp(Player player)

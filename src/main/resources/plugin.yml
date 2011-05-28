@@ -1,6 +1,6 @@
 name: Wand
 main: com.elmakers.mine.bukkit.plugins.wand.WandPlugin
-version: 1.00
+version: 1.01
 website: http://mine.elmakers.com
 author: NathanWolf
 description : A Magic Wand for casting Spells

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import com.elmakers.mine.bukkit.plugins.spells.Spells;
 import com.elmakers.mine.bukkit.plugins.wand.utilities.PluginProperties;
@@ -156,7 +158,17 @@ public class Wands
 			player.setCanAdminister(true);
 		}
 		return player;
-	}	
+	}
+	
+	public Plugin getPlugin()
+	{
+	    return plugin;
+	}
+	
+	public Server getServer()
+	{
+	    return plugin.getServer();
+	}
 
 	public int getWandTypeId()
 	{

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 1.01
+ 
+ - Remove player.updateInventory, broken in 1.6. UI is broken.
+
 # 1.0
 
  - Try to get this updated to work with latest CB and Persistence
