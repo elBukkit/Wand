@@ -113,18 +113,15 @@ class WandPlayerListener extends PlayerListener
 		if (firstMaterialSlot == 8) return false;
 		
 		ItemStack lastSlot = contents[8];
+		SetInventoryTask setInventory = new SetInventoryTask(player);
 		for (int i = 7; i >= firstMaterialSlot; i--)
 		{
-			contents[i + 1] = contents[i];
+		    setInventory.addItem(i + 1, contents[i]);
 		}
-		contents[firstMaterialSlot] = lastSlot;
-
-		inventory.setContents(contents);
+		setInventory.addItem(firstMaterialSlot, lastSlot);
 		
-		ItemStack itemStack = new ItemStack(Material.getMaterial(wands.getWandTypeId()), 1);
-		player.getInventory().addItem(itemStack);
-		player.getInventory().removeItem(itemStack);
-		//player.updateInventory();
+		BukkitScheduler bs = wands.getServer().getScheduler();
+        bs.scheduleSyncDelayedTask(wands.getPlugin(), setInventory, 1);
 		
 		return true;
 	}
