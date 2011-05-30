@@ -13,12 +13,6 @@
 	<properties>
 		<build.version>1.01</build.version>
 	</properties>
-	<repositories>
-		<repository>
-			<id>bukkut-repo</id>
-			<url>http://artifacts.lukegb.com/artifactory/repo</url>
-		</repository>
-	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.bukkit</groupId>
