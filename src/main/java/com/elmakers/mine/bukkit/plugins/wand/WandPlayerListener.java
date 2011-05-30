@@ -52,7 +52,7 @@ class WandPlayerListener extends PlayerListener
 				SpellVariant spell = null;
 				for (int i = 0; i < 9; i++)
 				{
-					if (contents[i].getType() == Material.AIR || contents[i].getTypeId() == wands.getWandTypeId())
+					if (contents[i] == null || contents[i].getType() == Material.AIR || contents[i].getTypeId() == wands.getWandTypeId())
 					{
 						continue;
 					}
